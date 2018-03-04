@@ -1,0 +1,10 @@
+{
+    "projects": [{
+        "name": "MyProject",
+        "url": "git@github.com:[USER_NAME]/[REPO_NAME].git",
+        "dst": [{
+            "name": "backup",
+            "url": "git@bitbucket.org:[USER_NAME]/[REPO_NAME].git"
+        }]
+    }]
+}
