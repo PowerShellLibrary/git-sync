@@ -17,6 +17,9 @@ Clear-Host
 $configuration = Get-Content -Raw -Path .\config.json | ConvertFrom-Json
 $rootDirectoryPath = Get-CurrentLocation
 $rootDirectoryPath = Join-Path $rootDirectoryPath "repo"
+if(!(Test-Path $rootDirectoryPath)){
+    mkdir $rootDirectoryPath
+}
 
 $configuration.projects | % {
     Set-Location $rootDirectoryPath
@@ -39,7 +42,7 @@ $configuration.projects | % {
         git fetch --tags
 
         Write-Host "Pulling . . ." -ForegroundColor Yellow
-        git pull
+        git pull origin master
     }
     else {
         Write-Host "Repository does not exists" -ForegroundColor Red
@@ -73,3 +76,4 @@ $configuration.projects | % {
     }
 }
 Set-Location $rootDirectoryPath
+Set-Location ..
