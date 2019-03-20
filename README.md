@@ -5,12 +5,24 @@ The main goal of this script is to create enough redundancy so even if a single 
 
 ## How to use
 ### 1. Generate SSH key
-```bash
-cd c:\Users\Alan\.ssh\
+```powershell
+cd c:\Users\[USER_NAME]\.ssh\
 ssh-keygen.exe
+ssh-add.exe id_rsa
 notepad.exe id_rsa.pub
 ```
 
+In case you are using SSH agent delivered with Windows make sure that you enabled the **ssh-agent** service
+
+To solve this problem
+> Error connecting to agent: No such file or directory
+
+follow instructions below
+```powershell
+Set-Service -Name ssh-agent -StartupType Manual
+Start-Service ssh-agent
+Get-Service ssh*
+```
 ### 2. Add SSH keys to your alternate hosting websites
 Go to you repository hosting website and add key generated in previous step.
 
