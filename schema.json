@@ -1,0 +1,82 @@
+{
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "properties": {
+        "projects": {
+            "$id": "/properties/projects",
+            "type": "array",
+            "items": {
+                "$id": "/properties/projects/items",
+                "type": "object",
+                "required": ["name", "url", "dst"],
+                "properties": {
+                    "name": {
+                        "$id": "/properties/projects/items/properties/name",
+                        "type": "string",
+                        "title": "PROJECT NAME",
+                        "description": "An 2explanation about the purpose of this instance.",
+                        "default": ""
+                    },
+                    "url": {
+                        "$id": "/properties/projects/items/properties/url",
+                        "type": "string",
+                        "title": "The Url Schema ",
+                        "description": "An explanation about the purpose of this instance.",
+                        "default": ""
+                    },
+                    "dst": {
+                        "$id": "/properties/projects/items/properties/dst",
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                            "$id": "/properties/projects/items/properties/dst/items",
+                            "type": "object",
+                            "required": ["name", "url"],
+                            "properties": {
+                                "name": {
+                                    "$id": "/properties/projects/items/properties/dst/items/properties/name",
+                                    "type": "string",
+                                    "title": "The Name Schema ",
+                                    "description": "An explanation about the purpose of this instance.",
+                                    "default": "",
+                                    "examples": [
+                                        "vs"
+                                    ]
+                                },
+                                "url": {
+                                    "$id": "/properties/projects/items/properties/dst/items/properties/url",
+                                    "type": "string",
+                                    "title": "The Url Schema ",
+                                    "description": "An explanation about the purpose of this instance.",
+                                    "default": ""
+                                }
+                            },
+                            "defaultSnippets": [{
+                                "label": "New backup repository",
+                                "description": "Creates a project configuration",
+                                "body": {
+                                    "name": "${1:backup}",
+                                    "url": "${2:git@bitbucket.org:[USER_NAME]/[REPO_NAME].git}"
+                                }
+                            }]
+                        }
+                    }
+                },
+                "defaultSnippets": [{
+                    "label": "New project",
+                    "description": "Creates a project configuration",
+                    "body": {
+                        "name": "${1:MyProject}",
+                        "url": "${2:git@github.com:[USER_NAME]/[REPO_NAME].git}",
+                        "dst": [{
+                            "name": "${3:backup}",
+                            "url": "${4:git@bitbucket.org:[USER_NAME]/[REPO_NAME].git}"
+                        }]
+                    }
+                }]
+            }
+        }
+    }
+}
