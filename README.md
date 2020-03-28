@@ -3,6 +3,9 @@ Git-Sync helps you sync your repositories across multiple remotes.
 
 The main goal of this script is to create enough redundancy so even if a single provider will fail you can still access your code using alternative hosting companies.
 
+![how to](https://user-images.githubusercontent.com/6848691/77835310-cc29d180-714b-11ea-8a69-bd60ee6786cf.gif)
+
+
 ## How to use
 ### 1. Generate SSH key
 ```powershell
