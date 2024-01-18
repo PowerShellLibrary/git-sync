@@ -13,11 +13,18 @@ function Get-CurrentLocation {
     }
 }
 
+function Get-MasterSHA {
+    param (
+        $url
+    )
+    git ls-remote -h $url | ? { $_.Contains("refs/heads/master") } | % { $_.Substring(0, 40) } | Select-Object -First 1
+}
+
 Clear-Host
 $configuration = Get-Content -Raw -Path .\config.json | ConvertFrom-Json
 $rootDirectoryPath = Get-CurrentLocation
 $rootDirectoryPath = Join-Path $rootDirectoryPath "repo"
-if(!(Test-Path $rootDirectoryPath)){
+if (!(Test-Path $rootDirectoryPath)) {
     mkdir $rootDirectoryPath
 }
 
@@ -25,6 +32,20 @@ $configuration.projects | % {
     Set-Location $rootDirectoryPath
     Write-Host ""
     Write-Host "Processing: '$($_.name)'" -ForegroundColor Red
+
+    $sha = $_.sha
+    if (![string]::IsNullOrWhiteSpace($sha)) {
+        $shaMaster = Get-MasterSHA $_.url
+        if ($sha -eq $shaMaster) {
+            Write-Host "Validating SHA [OK]"
+            return
+        }
+        else {
+            Write-Host "Validating SHA [MISSMATCH]"
+            Write-Host "Master SHA: $shaMaster" -ForegroundColor Yellow
+            Write-Host "Config SHA: $sha" -ForegroundColor Yellow
+        }
+    }
 
     $repoPath = Join-Path $rootDirectoryPath $_.name
     if (Test-Path $repoPath) {
@@ -49,6 +70,9 @@ $configuration.projects | % {
         Write-Host "Clonning . . ." -ForegroundColor Yellow
         git clone $_.url
     }
+
+    $shaMaster = Get-MasterSHA $_.url
+    Write-Host "Master SHA: $shaMaster" -ForegroundColor Yellow
 
     Set-Location $rootDirectoryPath
     Set-Location $repoPath

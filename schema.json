@@ -26,6 +26,13 @@
                         "description": "An explanation about the purpose of this instance.",
                         "default": ""
                     },
+                    "sha": {
+                        "$id": "/properties/projects/items/properties/sha",
+                        "type": "string",
+                        "title": "The SHA Schema ",
+                        "description": "An explanation about the purpose of this instance.",
+                        "default": ""
+                    },
                     "dst": {
                         "$id": "/properties/projects/items/properties/dst",
                         "type": "array",
