@@ -1,3 +1,16 @@
+$branchPattern = [Regex]::new('(?<=ref: refs/heads/)\S+(?=\s+HEAD)')
+$shaPattern = [Regex]::new('\b[0-9a-f]{40}\b')
+
+class BranchInfo {
+    [string] $SHA
+    [string] $Name
+
+    BranchInfo($sha, $name) {
+        $this.SHA = $sha
+        $this.Name = $name
+    }
+}
+
 function Get-CurrentLocation {
     [CmdletBinding()]
     param ()
@@ -13,11 +26,14 @@ function Get-CurrentLocation {
     }
 }
 
-function Get-MasterSHA {
-    param (
-        $url
+function Get-DefaultBranch {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true, Position = 0 )]
+        [string]$Url
     )
-    git ls-remote -h $url | ? { $_.Contains("refs/heads/master") } | % { $_.Substring(0, 40) } | Select-Object -First 1
+    $output = git ls-remote --symref $Url HEAD
+    [BranchInfo]::new($shaPattern.Match($output).Value, $branchPattern.Match($output).Value)
 }
 
 Clear-Host
@@ -34,15 +50,15 @@ $configuration.projects | % {
     Write-Host "Processing: '$($_.name)'" -ForegroundColor Red
 
     $sha = $_.sha
+    $branch = Get-DefaultBranch $_.url
     if (![string]::IsNullOrWhiteSpace($sha)) {
-        $shaMaster = Get-MasterSHA $_.url
-        if ($sha -eq $shaMaster) {
+        if ($sha -eq $branch.SHA) {
             Write-Host "Validating SHA [OK]"
             return
         }
         else {
             Write-Host "Validating SHA [MISSMATCH]"
-            Write-Host "Master SHA: $shaMaster" -ForegroundColor Yellow
+            Write-Host "Master SHA: $($branch.SHA)" -ForegroundColor Yellow
             Write-Host "Config SHA: $sha" -ForegroundColor Yellow
         }
     }
@@ -62,8 +78,10 @@ $configuration.projects | % {
         Write-Host "Fetching . . ." -ForegroundColor Yellow
         git fetch --tags
 
-        Write-Host "Pulling . . ." -ForegroundColor Yellow
-        git pull origin master
+        git checkout $branch.Name
+
+        Write-Host "Pulling  . . ." -ForegroundColor Yellow
+        git pull origin $branch.Name
     }
     else {
         Write-Host "Repository does not exists" -ForegroundColor Red
@@ -71,8 +89,7 @@ $configuration.projects | % {
         git clone $_.url
     }
 
-    $shaMaster = Get-MasterSHA $_.url
-    Write-Host "Master SHA: $shaMaster" -ForegroundColor Yellow
+    Write-Host "Master SHA: $($branch.SHA) [$($branch.Name)]" -ForegroundColor Yellow
 
     Set-Location $rootDirectoryPath
     Set-Location $repoPath
