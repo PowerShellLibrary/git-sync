@@ -36,6 +36,37 @@ function Get-DefaultBranch {
     [BranchInfo]::new($shaPattern.Match($output).Value, $branchPattern.Match($output).Value)
 }
 
+function Get-OutdatedRemotes {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true, Position = 0 )]
+        $project,
+
+        [Parameter(Mandatory = $true, Position = 1 )]
+        $masterBranch
+    )
+
+    $project.dst | ? {
+        $remoteName = $_.name
+        $remoteUrl = $_.url
+
+        Write-Host "`t$remoteName " -ForegroundColor Cyan -NoNewline
+        $branchRemote = Get-DefaultBranch $remoteUrl
+
+        if ($branchRemote.SHA -eq $masterBranch.SHA) {
+            Write-Host "[OK]" -ForegroundColor Green
+        }
+        else {
+            Write-Host "[MISSMATCH]" -ForegroundColor Red
+            Write-Host "Master SHA: $($masterBranch.SHA)" -ForegroundColor Yellow
+            Write-Host "Remote SHA: $($branchRemote.SHA)" -ForegroundColor Yellow
+            $_
+        }
+    }
+
+
+}
+
 Clear-Host
 $configuration = Get-Content -Raw -Path .\config.json | ConvertFrom-Json
 $rootDirectoryPath = Get-CurrentLocation
@@ -51,6 +82,7 @@ $configuration.projects | % {
 
     $sha = $_.sha
     $branch = Get-DefaultBranch $_.url
+    # deprecated - SHA validation will be done against the master branch and remotes
     if (![string]::IsNullOrWhiteSpace($sha)) {
         if ($sha -eq $branch.SHA) {
             Write-Host "Validating SHA [OK]"
@@ -61,6 +93,14 @@ $configuration.projects | % {
             Write-Host "Master SHA: $($branch.SHA)" -ForegroundColor Yellow
             Write-Host "Config SHA: $sha" -ForegroundColor Yellow
         }
+    }
+    # end deprecated
+
+    Write-Host "Getting outdated remotes" -ForegroundColor Yellow
+    $remotes = Get-OutdatedRemotes -Project $_ -MasterBranch $branch
+    if (!$remotes) {
+        Write-Host "No remotes to update" -ForegroundColor Green
+        return
     }
 
     $repoPath = Join-Path $rootDirectoryPath $_.name
@@ -96,7 +136,7 @@ $configuration.projects | % {
     Write-Host "Current Location $(Get-CurrentLocation)" -ForegroundColor Gray
 
     Write-Host "Validating remotes" -ForegroundColor Cyan
-    $_.dst | % {
+    $remotes | % {
         $remoteName = $_.name
         $remoteUrl = $_.url
         Write-Host "`t$remoteName" -ForegroundColor Cyan -NoNewline

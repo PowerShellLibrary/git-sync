@@ -29,9 +29,10 @@
                     "sha": {
                         "$id": "/properties/projects/items/properties/sha",
                         "type": "string",
-                        "title": "The SHA Schema ",
-                        "description": "An explanation about the purpose of this instance.",
-                        "default": ""
+                        "title": "The SHA Schema",
+                        "description": "This property is obsolete and should not be used.",
+                        "default": "",
+                        "deprecated": true
                     },
                     "dst": {
                         "$id": "/properties/projects/items/properties/dst",
