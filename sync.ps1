@@ -86,7 +86,7 @@ $configuration.projects | % {
     else {
         Write-Host "Repository does not exists" -ForegroundColor Red
         Write-Host "Clonning . . ." -ForegroundColor Yellow
-        git clone $_.url
+        git clone $_.url $_.name
     }
 
     Write-Host "Master SHA: $($branch.SHA) [$($branch.Name)]" -ForegroundColor Yellow
