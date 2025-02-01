@@ -33,7 +33,9 @@ function Get-DefaultBranch {
         [string]$Url
     )
     $output = git ls-remote --symref $Url HEAD
-    [BranchInfo]::new($shaPattern.Match($output).Value, $branchPattern.Match($output).Value)
+    if ($output) {
+        [BranchInfo]::new($shaPattern.Match($output).Value, $branchPattern.Match($output).Value)
+    }
 }
 
 function Get-OutdatedRemotes {
@@ -53,18 +55,23 @@ function Get-OutdatedRemotes {
         Write-Host "`t$remoteName " -ForegroundColor Cyan -NoNewline
         $branchRemote = Get-DefaultBranch $remoteUrl
 
-        if ($branchRemote.SHA -eq $masterBranch.SHA) {
-            Write-Host "[OK]" -ForegroundColor Green
+        if ($branchRemote) {
+            if ($branchRemote.SHA -eq $masterBranch.SHA) {
+                Write-Host "[OK]" -ForegroundColor Green
+            }
+            else {
+                Write-Host "[MISSMATCH]" -ForegroundColor Red
+                Write-Host "Master SHA: $($masterBranch.SHA)" -ForegroundColor Yellow
+                Write-Host "Remote SHA: $($branchRemote.SHA)" -ForegroundColor Yellow
+                $_
+            }
         }
         else {
-            Write-Host "[MISSMATCH]" -ForegroundColor Red
-            Write-Host "Master SHA: $($masterBranch.SHA)" -ForegroundColor Yellow
-            Write-Host "Remote SHA: $($branchRemote.SHA)" -ForegroundColor Yellow
+            Write-Host "[MISSING]" -ForegroundColor Red
+            write-host "Default branch not found" -ForegroundColor Yellow
             $_
         }
     }
-
-
 }
 
 Clear-Host
